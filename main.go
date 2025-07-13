@@ -7,26 +7,20 @@ import (
 	"unicode"
 )
 
-// HASH array used for key generation
 var hash = []rune{
 	'X', 'r', 'q', 'a', 'H', 'N', 'p', 'd', 'S', 'Y', 'w', '8', '6', '2', '1', '5',
 }
 
-// NetData represents the network data with BSSID
 type NetData struct {
 	BSSID string
 }
 
-// DlinkKeyCalculator generates keys for D-Link routers
 type DlinkKeyCalculator struct{}
 
-// GetKey generates the key for a given network BSSID
-// Algorithm documentation: http://lixei.me/codigo-fonte-wpa-dlink-php-c/
 func (d *DlinkKeyCalculator) GetKey(network NetData) ([]string, error) {
-	// Remove colons from BSSID
+
 	trimmedBSSID := strings.ReplaceAll(network.BSSID, ":", "")
 
-	// Validate BSSID length (should be 12 characters after removing colons)
 	if len(trimmedBSSID) != 12 {
 		return nil, fmt.Errorf("invalid BSSID format: expected 12 characters, got %d", len(trimmedBSSID))
 	}
@@ -34,7 +28,6 @@ func (d *DlinkKeyCalculator) GetKey(network NetData) ([]string, error) {
 	key := make([]rune, 20)
 	newKey := make([]rune, 20)
 
-	// Rearrange the BSSID characters according to the algorithm
 	key[0] = rune(trimmedBSSID[11])
 	key[1] = rune(trimmedBSSID[0])
 	key[2] = rune(trimmedBSSID[10])
@@ -56,7 +49,6 @@ func (d *DlinkKeyCalculator) GetKey(network NetData) ([]string, error) {
 	key[18] = rune(trimmedBSSID[4])
 	key[19] = rune(trimmedBSSID[10])
 
-	// Convert each character to hash index and replace with hash value
 	for i := 0; i < 20; i++ {
 		t := key[i]
 		var index int
@@ -88,18 +80,15 @@ func main() {
 
 	bssid := os.Args[1]
 
-	// Create network data and calculator
 	network := NetData{BSSID: bssid}
 	calculator := &DlinkKeyCalculator{}
 
-	// Generate the key
 	keys, err := calculator.GetKey(network)
 	if err != nil {
 		fmt.Printf("Error generating key: %v\n", err)
 		os.Exit(1)
 	}
 
-	// Print the generated key(s)
 	fmt.Printf("BSSID: %s\n", bssid)
 	fmt.Printf("Generated Key: %s\n", keys[0])
 }
